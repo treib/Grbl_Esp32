@@ -44,7 +44,7 @@ void grbl_init() {
     memset(sys_position, 0, sizeof(sys_position));  // Clear machine position.
 
 #ifdef USE_MACHINE_INIT
-    machine_init();  // user supplied function for special initialization
+    user_machine_init();  // user supplied function for special initialization
 #endif
     // Initialize system state.
 #ifdef FORCE_INITIALIZATION_ALARM
@@ -116,6 +116,8 @@ void run_once() {
     // is re-executed by an enclosing loop.
     protocol_main_loop();
 }
+
+__attribute__((weak)) void user_machine_init() {}
 
 /*
   setup() and loop() in the Arduino .ino implements this control flow:

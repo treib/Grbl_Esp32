@@ -91,8 +91,7 @@ const char* const GRBL_VERSION_BUILD = "20201207";
 void grbl_init();
 void run_once();
 
-// Called if USE_MACHINE_INIT is defined
-void machine_init();
+void user_machine_init();  // weak definition in Grbl.cpp
 
 // Called if USE_CUSTOM_HOMING is defined
 bool user_defined_homing(uint8_t cycle_mask);
