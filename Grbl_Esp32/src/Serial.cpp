@@ -63,6 +63,8 @@ static TaskHandle_t serialCheckTaskHandle = 0;
 
 WebUI::InputBuffer client_buffer[CLIENT_COUNT];  // create a buffer for each client
 
+ExecState local_exec_state;
+
 // Returns the number of bytes available in a client buffer.
 uint8_t serial_get_rx_buffer_available(uint8_t client) {
     return client_buffer[client].availableforwrite();
@@ -117,6 +119,7 @@ void serialCheckTask(void* pvParameters) {
     uint8_t            data            = 0;
     uint8_t            client          = CLIENT_ALL;  // who sent the data
     static UBaseType_t uxHighWaterMark = 0;
+    local_exec_state.value = 0;
     while (true) {  // run continuously
         while (any_client_has_data()) {
             if (Serial.available()) {
@@ -218,6 +221,16 @@ uint8_t serial_read(uint8_t client) {
     }
 }
 
+// returns the local exec state bits and also clears them
+ExecState serial_get_and_clear_local_exec_state() {
+    ExecState result;
+    vTaskEnterCritical(&myMutex);
+    result.value = local_exec_state.value;
+    local_exec_state.value = 0;
+    vTaskExitCritical(&myMutex);
+    return result;
+}
+
 bool any_client_has_data() {
     return (Serial.available() || WebUI::inputBuffer.available()
 #ifdef ENABLE_BLUETOOTH
@@ -251,17 +264,25 @@ void execute_realtime_command(Cmd command, uint8_t client) {
             report_realtime_status(client);  // direct call instead of setting flag
             break;
         case Cmd::CycleStart:
-            sys_rt_exec_state.bit.cycleStart = true;
+            vTaskEnterCritical(&myMutex);
+            local_exec_state.bit.cycleStart = true;
+            vTaskExitCritical(&myMutex);
             break;
         case Cmd::FeedHold:
-            sys_rt_exec_state.bit.feedHold = true;
+            vTaskEnterCritical(&myMutex);
+            local_exec_state.bit.feedHold = true;
+            vTaskExitCritical(&myMutex);
             break;
         case Cmd::SafetyDoor:
-            sys_rt_exec_state.bit.safetyDoor = true;
+            vTaskEnterCritical(&myMutex);
+            local_exec_state.bit.safetyDoor = true;
+            vTaskExitCritical(&myMutex);
             break;
         case Cmd::JogCancel:
             if (sys.state == State::Jog) {  // Block all other states from invoking motion cancel.
-                sys_rt_exec_state.bit.motionCancel = true;
+                vTaskEnterCritical(&myMutex);
+                local_exec_state.bit.motionCancel = true;
+                vTaskExitCritical(&myMutex);
             }
             break;
         case Cmd::DebugReport:

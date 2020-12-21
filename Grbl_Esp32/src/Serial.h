@@ -42,6 +42,9 @@ void serial_write(uint8_t data);
 // Fetches the first byte in the serial read buffer. Called by main program.
 uint8_t serial_read(uint8_t client);
 
+// returns the local exec state bits and also clears them
+ExecState serial_get_and_clear_local_exec_state();
+
 // See if the character is an action command like feedhold or jogging. If so, do the action and return true
 uint8_t check_action_command(uint8_t data);
 

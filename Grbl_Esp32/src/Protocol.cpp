@@ -271,6 +271,7 @@ void protocol_exec_rt_system() {
         sys_rt_exec_alarm = ExecAlarm::None;
     }
     ExecState rt_exec_state;
+    sys_rt_exec_state.value |= serial_get_and_clear_local_exec_state().value;  // update global state with any new bits from the serial handler
     rt_exec_state.value = sys_rt_exec_state.value;  // Copy volatile sys_rt_exec_state.
     if (rt_exec_state.value != 0 || cycle_stop) {                 // Test if any bits are on
         // Execute system abort.
