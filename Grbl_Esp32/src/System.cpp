@@ -38,6 +38,7 @@ volatile bool          sys_safetyDoor;
 volatile bool          sys_motionCancel;
 volatile bool          sys_sleep;
 
+volatile void*         sys_pl_data_inflight;            // holds a plan_line_data_t while mc_line has taken ownership of a line motion
 #ifdef DEBUG
 volatile bool sys_rt_exec_debug;
 #endif

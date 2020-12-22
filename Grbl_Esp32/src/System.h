@@ -148,6 +148,7 @@ extern volatile bool          sys_safetyDoor;
 extern volatile bool          sys_motionCancel;
 extern volatile bool          sys_sleep;
 
+extern volatile void*         sys_pl_data_inflight;            // holds a plan_line_data_t while mc_line has taken ownership of a line motion
 #ifdef DEBUG
 extern volatile bool sys_rt_exec_debug;
 #endif
